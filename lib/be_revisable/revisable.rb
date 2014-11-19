@@ -7,7 +7,7 @@ module BeRevisable
     included(nil) do
 
       def self.revision_set_name
-        "#{self.name.to_s.underscore.gsub('/', '__')}_revision_set"
+       @revision_set_name ||=  "#{self.name.to_s.underscore.gsub('/', '__')}_revision_set"
       end
 
       has_one :revision_info, :class_name => ::BeRevisable::RevisionInfo.name.to_s, :as => :revision, :dependent => :destroy, :autosave => false
@@ -30,11 +30,14 @@ module BeRevisable
 
       scope :revisable, lambda {preload(:revision_info)}
 
-        scope :releases, lambda { joins(:revision_info).where("be_revisable_revision_infos.status" => [::BeRevisable::RevisionInfo::Status::LATEST_RELEASE, ::BeRevisable::RevisionInfo::Status::EXPIRED]) }
+      scope :releases, lambda { joins(:revision_info).where("be_revisable_revision_infos.status" => [::BeRevisable::RevisionInfo::Status::LATEST_RELEASE, ::BeRevisable::RevisionInfo::Status::EXPIRED]) }
+
       scope :drafts, lambda { joins(:revision_info).where("be_revisable_revision_infos.status" => ::BeRevisable::RevisionInfo::Status::PRIMARY_DRAFT) }
+
       scope :revisions_between, lambda { |datetime_range| releases.
           where('be_revisable_revision_infos.released_at <= ?', datetime_range.end).
           where('(be_revisable_revision_infos.expired_at > ? or be_revisable_revision_infos.expired_at is null) ', datetime_range.begin) }
+
       scope :revisions_of_revision_sets, lambda { |revision_set_ids|
         joins(revision_set_name).
             where('be_revisable_revision_sets.id' => revision_set_ids)
