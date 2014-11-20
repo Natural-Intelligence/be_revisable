@@ -7,7 +7,7 @@ Make active records revisable
 Add this line to your application's Gemfile:
 
     gem 'be_revisable',     
-    :git => "http:<user>:<password>//github.com/Natural-Intelligence/be_revisable.git",
+    :git => "http://github.com/Natural-Intelligence/be_revisable.git",
     :branch => 'v0.0.1'
 
 And then execute:
