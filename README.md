@@ -8,7 +8,7 @@ Add this line to your application's Gemfile:
 
     gem 'be_revisable',     
     :git => "http://github.com/Natural-Intelligence/be_revisable.git",
-    :branch => 'v0.0.2'
+    :tag => 'v0.0.2'
 
 And then execute:
 
