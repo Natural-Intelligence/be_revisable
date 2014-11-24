@@ -28,7 +28,7 @@ module BeRevisable
         self.revision_info.save! if self.revision_info.changed? || self.revision_info.new_record?
       end
 
-      scope :revisable, lambda {preload(:revision_info)}
+      scope :revisable, lambda {includes(:revision_info)}
 
       scope :by_status, lambda { |versions| joins(:revision_info).where("be_revisable_revision_infos.status" => versions) }
 
