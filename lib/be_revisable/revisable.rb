@@ -15,9 +15,9 @@ module BeRevisable
 
 
       delegate :primary_draft?, :temporary_draft?, :released?, :latest_release?, :expired?, :deprecated?, :deprecating_draft?, :ongoing?,
-               :expired_at, :released_at, :released_by, :expired_releases, :status, :deprecated_at, :earliest_release_date,
+               :expired_at, :released_at, :released_by, :status, :deprecated_at, :earliest_release_date,
                :to => :revision_info
-      delegate :temporary_drafts, :primary_draft, :latest_release, :revisions, :to => :revision_set
+      delegate :temporary_drafts, :primary_draft, :latest_release, :expired_releases, :revisions, :to => :revision_set
 
       amoeba do
         enable
@@ -116,6 +116,20 @@ module BeRevisable
       def release_time_range
         return nil unless released?
         released_at..(expired_at || Time.now)
+      end
+
+      # Rollback latest release to it's previous state
+      # Primary draft will be Destroyed!
+      # Latest release will become primary draft
+      # The latest expired release will overwrite the primary draft
+      def rollback!
+        raise 'Only latest release can be rolled back' unless latest_release?
+        ActiveRecord::Base.transaction do
+          primary_draft.destroy
+          revision_info.set_as_primary_draft.save!
+          expired_releases.revisable.order('be_revisable_revision_infos.expired_at').last.revision_info.set_as_latest_release(nil, nil, false).save!
+        end
+        true
       end
 
       protected
