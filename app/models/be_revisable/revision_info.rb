@@ -133,6 +133,7 @@ module BeRevisable
         self.released_at= release_datetime
         self.released_by = user_id
       end
+      self.expired_at = nil
       self.status = Status::LATEST_RELEASE
       self
     end
