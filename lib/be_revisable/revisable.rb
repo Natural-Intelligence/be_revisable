@@ -126,8 +126,11 @@ module BeRevisable
         raise 'Only latest release can be rolled back' unless latest_release?
         ActiveRecord::Base.transaction do
           primary_draft.destroy
-          revision_info.set_as_primary_draft.save!
-          expired_releases.revisable.order('be_revisable_revision_infos.expired_at').last.revision_info.set_as_latest_release(nil, nil, false).save!
+          revision_info.set_as_primary_draft
+          revision_info.released_at = nil
+          revision_info.released_by = nil
+          revision_info.save!
+          expired_releases.revisable.order('be_revisable_revision_infos.expired_at').last.revision_info.set_as_latest_release(nil, nil, false).save! if expired_releases.size > 0
         end
         true
       end
