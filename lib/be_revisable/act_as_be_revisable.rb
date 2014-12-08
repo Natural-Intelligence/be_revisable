@@ -1,5 +1,5 @@
 module BeRevisable
-  module Injection
+  module ActAsBeRevisable
     def be_revisable(options={}, &block)
 
       # Creates the ObjectRevisionSet for the revisable model and add an association for it to the revisable model

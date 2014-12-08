@@ -2,12 +2,12 @@ module BeRevisable
   class RevisionInfo < ActiveRecord::Base
 
     module Status
-      PRIMARY_DRAFT = 'PRIMARY_DRAFT'
-      TEMPORARY_DRAFT = 'TEMPORARY_DRAFT'
-      LATEST_RELEASE = 'LATEST_RELEASE'
-      EXPIRED = 'EXPIRED'
-      DEPRECATED = 'DEPRECATED'
-      DEPRECATING_DRAFT = 'DEPRECATING_DRAFT'
+      PRIMARY_DRAFT ||= 'PRIMARY_DRAFT'
+      TEMPORARY_DRAFT ||= 'TEMPORARY_DRAFT'
+      LATEST_RELEASE ||= 'LATEST_RELEASE'
+      EXPIRED ||= 'EXPIRED'
+      DEPRECATED ||= 'DEPRECATED'
+      DEPRECATING_DRAFT ||= 'DEPRECATING_DRAFT'
     end
 
     belongs_to :revision_set
@@ -125,11 +125,14 @@ module BeRevisable
     #
     # @param [Integer] user_id - the id of the user that released the revision
     # @param [DateTime] expiration_datetime - optional, the time the revision is released. default is DateTime.now
+    # @param [Boolean] set_metadata - if true, released_at and released_by will be set. (true by default)
     #
     # @return [BeRevisable::RevisionInfo] - The revision info
-    def set_as_latest_release(user_id, release_datetime = DateTime.now)
-      self.released_at= release_datetime
-      self.released_by = user_id
+    def set_as_latest_release(user_id, release_datetime = DateTime.now, set_metadata = true)
+      if set_metadata
+        self.released_at= release_datetime
+        self.released_by = user_id
+      end
       self.status = Status::LATEST_RELEASE
       self
     end
