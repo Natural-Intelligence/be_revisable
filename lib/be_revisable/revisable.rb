@@ -7,7 +7,7 @@ module BeRevisable
     included(nil) do
 
       def self.revision_set_name
-       @revision_set_name ||=  "#{self.name.to_s.underscore.gsub('/', '__')}_revision_set"
+        @revision_set_name ||= "#{self.name.to_s.underscore.gsub('/', '__')}_revision_set"
       end
 
       has_one :revision_info, :class_name => ::BeRevisable::RevisionInfo.name.to_s, :as => :revision, :dependent => :destroy, :autosave => false
@@ -28,7 +28,7 @@ module BeRevisable
         self.revision_info.save! if self.revision_info.changed? || self.revision_info.new_record?
       end
 
-      scope :revisable, lambda {includes(:revision_info)}
+      scope :revisable, lambda { includes(:revision_info) }
 
       scope :by_status, lambda { |versions| joins(:revision_info).where("be_revisable_revision_infos.status" => versions) }
 
@@ -66,9 +66,22 @@ module BeRevisable
         create_duplicated_revision(:set_as_temporary_draft)
       end
 
+
+      # Allowed only for latest release - Raise if not a latest release
+      # Change the LATEST_RELEASE revision to EXPIRED (if exist)
+      # Returns Boolean - true on success, raise on error
+      def expire!(replace_time = DateTime.now)
+        raise "Only latest release can be expired. #{revisable_info}" unless latest_release?
+
+        ActiveRecord::Base.transaction do
+          revision_info.set_as_expired(replace_time)
+          save! unless new_record?
+        end
+      end
+
       # Allowed only for primary draft - Raise if not a primary_draft
       # Clones the revision (create primary draft),
-      # Change the revision status to LATESt_RELEASE
+      # Change the revision status to LATEST_RELEASE
       # Change the LATEST_RELEASE revision to EXPIRED (if exist)
       # Returns Boolean - true on success, raise on error
       def release!(user_id = nil)
@@ -76,11 +89,7 @@ module BeRevisable
         ActiveRecord::Base.transaction do
           replace_time = DateTime.now
 
-          revision_to_expire = latest_release
-          unless revision_to_expire.nil?
-            revision_to_expire.revision_info.set_as_expired(replace_time)
-            revision_to_expire.save! unless new_record?
-          end
+          latest_release.expire!(replace_time) unless latest_release.nil?
 
           revision_info.set_as_latest_release(user_id, replace_time)
           revision_info.save! unless new_record?
