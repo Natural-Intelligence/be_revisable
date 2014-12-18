@@ -15,7 +15,7 @@ module BeRevisable
 
 
       delegate :primary_draft?, :temporary_draft?, :released?, :latest_release?, :expired?, :deprecated?, :deprecating_draft?, :ongoing?,
-               :expired_at, :released_at, :released_by, :status, :deprecated_at, :earliest_release_date,
+               :expired_at, :released_at, :released_by, :status, :deprecated_at, :earliest_release_date, :revision_set_id,
                :to => :revision_info
       delegate :temporary_drafts, :primary_draft, :latest_release, :expired_releases, :revisions, :to => :revision_set
 
