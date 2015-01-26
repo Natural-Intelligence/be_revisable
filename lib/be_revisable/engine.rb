@@ -1,4 +1,3 @@
-# Rails Engine copies the migration to the Rails app
 module BeRevisable
   class Engine < Rails::Engine
     isolate_namespace BeRevisable
