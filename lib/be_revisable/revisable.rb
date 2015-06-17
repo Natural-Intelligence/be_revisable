@@ -30,7 +30,7 @@ module BeRevisable
 
       scope :revisable, lambda { includes(:revision_info) }
 
-      scope :revisable_with_changes, lambda { joins(revision_info: :revision_changes) }
+      scope :revisable_with_changes, lambda { includes(revision_info: :revision_changes) }
 
       scope :by_status, lambda { |versions| joins(:revision_info).where("be_revisable_revision_infos.status" => versions) }
 
