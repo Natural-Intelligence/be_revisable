@@ -30,6 +30,8 @@ module BeRevisable
 
       scope :revisable, lambda { includes(:revision_info) }
 
+      scope :revisable_with_changes, lambda { joins(revision_info: :revision_changes) }
+
       scope :by_status, lambda { |versions| joins(:revision_info).where("be_revisable_revision_infos.status" => versions) }
 
       scope :releases, lambda { by_status([::BeRevisable::RevisionInfo::Status::LATEST_RELEASE, ::BeRevisable::RevisionInfo::Status::EXPIRED]) }
@@ -107,6 +109,7 @@ module BeRevisable
         revision_info.revision_set
       end
 
+
       alias_method :true_revision_set, revision_set_name
       alias_method revision_set_name, :revision_set
 
@@ -142,6 +145,14 @@ module BeRevisable
           expired_releases.revisable.order('be_revisable_revision_infos.expired_at').last.revision_info.set_as_latest_release(nil, nil, false).save! if expired_releases.size > 0
         end
         true
+      end
+
+      def log_change(user_id, description)
+        revision_info.revision_changes.create(user_id: user_id, description: description, change_date: DateTime.current)
+      end
+
+      def changes
+        revision_info.revision_changes
       end
 
       protected
