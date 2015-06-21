@@ -8,13 +8,14 @@ module BeRevisable
       EXPIRED ||= 'EXPIRED'
       DEPRECATED ||= 'DEPRECATED'
       DEPRECATING_DRAFT ||= 'DEPRECATING_DRAFT'
+      DELETED ||= 'DELETED'
     end
 
     belongs_to :revision_set
     belongs_to :revision, polymorphic: true
     has_and_belongs_to_many :deprecator_of, :join_table => :be_revisable_info_deprecations, :foreign_key => :deprecator_of_revision_info_id, :association_foreign_key => :deprecated_by_revision_info_id, :class_name => RevisionInfo.name.to_s
     has_and_belongs_to_many :deprecated_by_revisions, :join_table => :be_revisable_info_deprecations, :foreign_key => :deprecated_by_revision_info_id, :association_foreign_key => :deprecator_of_revision_info_id, :class_name => RevisionInfo.name.to_s
-    has_many :revision_changes #, dependent: :destroy
+    has_many :revision_changes, dependent: :destroy
 
     scope :temporary_drafts, where('be_revisable_revision_infos.status' => ::BeRevisable::RevisionInfo::Status::TEMPORARY_DRAFT)
     scope :deprecating_drafts, where('be_revisable_revision_infos.status' => ::BeRevisable::RevisionInfo::Status::DEPRECATING_DRAFT)

@@ -10,6 +10,7 @@ module BeRevisable
   models_dir = Gem::Specification.find_by_name("be_revisable").gem_dir + '/app/models'
   require models_dir + '/be_revisable/revision_set'
   require models_dir + '/be_revisable/revision_info'
+  require models_dir + '/be_revisable/revision_change'
 
   require 'be_revisable/revisable'
   require 'be_revisable/helper'

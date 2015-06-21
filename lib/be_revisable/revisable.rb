@@ -28,6 +28,8 @@ module BeRevisable
         self.revision_info.save! if self.revision_info.changed? || self.revision_info.new_record?
       end
 
+      #default_scope { where("be_revisable_revision_infos.status" => ::BeRevisable::RevisionInfo::Status::EXPIRED) }
+
       scope :revisable, lambda { includes(:revision_info) }
 
       scope :revisable_with_changes, lambda { includes(revision_info: :revision_changes) }
@@ -153,6 +155,13 @@ module BeRevisable
 
       def changes
         revision_info.revision_changes
+      end
+
+      def soft_delete
+        if revision_info.status == RevisionInfo::Status::PRIMARY_DRAFT
+          revision_info.status = RevisionInfo::Status::DELETED
+          revision_info.save!
+        end
       end
 
       protected
