@@ -16,6 +16,7 @@ module BeRevisable
   require 'be_revisable/helper'
   require 'be_revisable/act_as_be_revisable'
   require 'be_revisable/deprecatable'
+  require 'be_revisable/logable'
   require 'be_revisable/revision_retroactive_change_notifier'
   require 'be_revisable/autoload'
 

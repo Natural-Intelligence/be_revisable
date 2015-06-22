@@ -52,6 +52,7 @@ module BeRevisable
 
       include Revisable
       include Deprecatable if options[:deprecatable]
+      include Logable if options[:logable]
 
     end
   end

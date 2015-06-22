@@ -28,11 +28,7 @@ module BeRevisable
         self.revision_info.save! if self.revision_info.changed? || self.revision_info.new_record?
       end
 
-      #default_scope { where("be_revisable_revision_infos.status" => ::BeRevisable::RevisionInfo::Status::EXPIRED) }
-
       scope :revisable, lambda { includes(:revision_info) }
-
-      scope :revisable_with_changes, lambda { includes(revision_info: :revision_changes) }
 
       scope :by_status, lambda { |versions| joins(:revision_info).where("be_revisable_revision_infos.status" => versions) }
 
@@ -64,12 +60,20 @@ module BeRevisable
         end
       end
 
-
       # Returns RevisionableObject - creates and returns a new temporary draft
       def create_temporary_draft!
         create_duplicated_revision(:set_as_temporary_draft)
       end
 
+      # Allowed only for primary draft - Raise if not a primary_draft
+      # Sign the Primary draft as Deleted draft
+      def delete_draft
+        raise "Only primary draft can be deleted. #{revisable_info}" unless primary_draft?
+        ActiveRecord::Base.transaction do
+          revision_info.set_as_deleted_draft
+          revision_info.save! unless new_record?
+        end
+      end
 
       # Allowed only for latest release - Raise if not a latest release
       # Change the LATEST_RELEASE revision to EXPIRED (if exist)
@@ -147,21 +151,6 @@ module BeRevisable
           expired_releases.revisable.order('be_revisable_revision_infos.expired_at').last.revision_info.set_as_latest_release(nil, nil, false).save! if expired_releases.size > 0
         end
         true
-      end
-
-      def log_change(user_id, description)
-        revision_info.revision_changes.create(user_id: user_id, description: description, change_date: DateTime.current)
-      end
-
-      def changes
-        revision_info.revision_changes
-      end
-
-      def soft_delete
-        if revision_info.status == RevisionInfo::Status::PRIMARY_DRAFT
-          revision_info.status = RevisionInfo::Status::DELETED
-          revision_info.save!
-        end
       end
 
       protected
