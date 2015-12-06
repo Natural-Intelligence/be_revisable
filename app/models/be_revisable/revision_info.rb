@@ -9,6 +9,7 @@ module BeRevisable
       DEPRECATED ||= 'DEPRECATED'
       DEPRECATING_DRAFT ||= 'DEPRECATING_DRAFT'
       DELETED_DRAFT ||= 'DELETED_DRAFT'
+      DELETED ||= 'DELETED'
     end
 
     belongs_to :revision_set
@@ -81,6 +82,10 @@ module BeRevisable
       status == Status::DELETED_DRAFT
     end
 
+    def deleted?
+      status == Status::DELETED
+    end
+
     def ongoing?
       expired_at.nil?
     end
@@ -132,6 +137,11 @@ module BeRevisable
     # @return [BeRevisable::RevisionInfo] - The revision info
     def set_as_deleted_draft
       self.status = Status::DELETED_DRAFT
+      self
+    end
+
+    def set_as_deleted
+      self.status = Status::DELETED
       self
     end
 

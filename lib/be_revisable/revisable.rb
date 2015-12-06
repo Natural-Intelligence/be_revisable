@@ -75,6 +75,13 @@ module BeRevisable
         end
       end
 
+      def set_as_deleted
+        ActiveRecord::Base.transaction do
+          revision_info.set_as_deleted
+          revision_info.save! unless new_record?
+        end
+      end
+
       # Allowed only for latest release - Raise if not a latest release
       # Change the LATEST_RELEASE revision to EXPIRED (if exist)
       # Returns Boolean - true on success, raise on error
